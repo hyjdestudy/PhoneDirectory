@@ -16,7 +16,7 @@ typedef struct {
 	char mobile[12];  //移动电话
 }User;  //定义结构体为User
 
-//用链表实现电话本
+//用顺序表实现电话本
 typedef struct {
 	User *users;
 	int user_num;  //已存入的用户数
@@ -164,7 +164,7 @@ void show_menu() {
 	printf("请选择菜单1-5：");
 }
 
-void header_output(char msg[100]) {
+void message_output(char msg[100]) {
 	printf("\t\t\t\t");
 	printf("---%s---\n", msg);
 }
@@ -196,12 +196,12 @@ int main() {
 		switch (choice) {
 			case 1:
 				strcpy_s(message,"浏览联系人");
-				header_output(message);
+				message_output(message);
 				traverse_book(my_pb);
 				break;
 			case 2:
 				strcpy_s(message, "查找联系人");
-				header_output(message);
+				message_output(message);
 				//按姓名查找联系人
 				printf("请输入要查找的联系人姓名（最多10个字符）：");
 				scanf_s("%s", my_user.name,(unsigned)_countof(my_user.name));
@@ -214,7 +214,7 @@ int main() {
 				break;
 			case 3:
 				strcpy_s(message, "新增联系人");
-				header_output(message);
+				message_output(message);
 				//输入新联系人信息
 				input_user(my_new_user);
 				//默认在电话本最后添加新联系人
@@ -222,7 +222,7 @@ int main() {
 				break;
 			case 4:
 				strcpy_s(message, "删除联系人");
-				header_output(message);
+				message_output(message);
 				printf("请输入要删除联系人的姓名：");
 				scanf_s("%s",my_user.name,(unsigned)_countof(my_user.name));
 				result=locate_user(my_pb,my_user);
@@ -233,13 +233,13 @@ int main() {
 				break;
 			case 5:
 				strcpy_s(message, "退出电话本");
-				header_output(message);
+				message_output(message);
 				printf("您已退出电话本程序，感谢您的使用！\n");
 				system("pause");
 				return 0;
 			default:
 				strcpy_s(message, "菜单项错误");
-				header_output(message);
+				message_output(message);
 				printf("菜单选择错误，请重新输入！\n");
 		}
 		tail_output();
