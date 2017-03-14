@@ -56,7 +56,7 @@ void traverse_book(PhoneBook *pb) {
 	int i = 0;
 	printf("所有联系人:%d\n",pb->user_num);
 	for (i = 0; i < pb->user_num; i++) {
-		printf("联系人%d:\n",i+1);
+		printf("联系人%d:\t",i+1);
 		printf("姓名：%s\t",pb->users[i].name);
 		printf("单位：%s\t", pb->users[i].department);
 		printf("电话：%s\t",pb->users[i].phone);
@@ -66,18 +66,12 @@ void traverse_book(PhoneBook *pb) {
 }
 
 //显示指定联系人信息
-void show_user_infor(PhoneBook *pb,int pos) {
-	if (pos<1 || pos>pb->user_num) {
-		printf("非法位置，不能显示该联系人信息！\n");
-	}
-	else {
-		int i = pos - 1;
-		printf("姓名：%s\t", pb->users[i].name);
-		printf("单位：%s\t", pb->users[i].department);
-		printf("电话：%s\t", pb->users[i].phone);
-		printf("手机：%s\t", pb->users[i].mobile);
-		printf("\n");
-	}
+void show_user_infor(User u) {
+	printf("姓名：%s\t", u.name);
+	printf("单位：%s\t", u.department);
+	printf("电话：%s\t", u.phone);
+	printf("手机：%s\t", u.mobile);
+	printf("\n");
 }
 
 //一会儿试一下input_user，返回一个User类型的指针***********************************************
@@ -89,12 +83,21 @@ int insert_new_user(PhoneBook *pb, User new_user, int p) {
 		printf("非法插入位置！不能添加新联系人\n");
 		return Err_IllegalPos;
 	}
+	if (pb->user_num == pb->book_size) {  //电话本写满了
+		User *newusers=(User*)realloc(pb->users,sizeof(User)*(pb->book_size+Increment_Size));
+		if (!newusers) {
+			printf("内存分配异常，不能扩展电话本！\n");
+			return Err_Memory;
+		}
+	}
+	//添加新联系人
 	int i = 0;
-	for (i = pb->user_num - 1; i >= p-1; i--) {
+	for (i = pb->user_num - 1; i >= p - 1; i--) {
 		pb->users[i + 1] = pb->users[i];
 	}
 	pb->users[p - 1] = new_user;
 	pb->user_num++;
+	printf("新联系人添加成功！\n");
 	return 0;
 }
 
@@ -111,6 +114,7 @@ int delete_user(PhoneBook *pb, int p, User *target_user) {
 		pb->users[i - 1] = pb->users[i];
 	}
 	pb->user_num--;
+	printf("删除联系人成功！\n");
 	return 0;
 }
 
@@ -137,16 +141,16 @@ int get_user(PhoneBook *pb, int p,User *target_user) {
 }
 
 void welcome() {
-	printf("******************************\n");
-	printf("**********电话本管理***********\n");
-	printf("******************************\n");
+	printf("\t\t\t**********电话本管理***********\n");
+	printf("\t\t\t*******************************\n");
 }
 
 int main() {
 	welcome();
 
 	int choice;  //接收用户输入的菜单选项
-	User my_user;  //声明一个User变量
+	User my_user;
+	User *target = (User*)malloc(sizeof(User));  //target用于存储取得的user
 	int result = 0;  //接收函数的返回值
 
 	//初始化一个电话本
@@ -161,26 +165,64 @@ int main() {
 		scanf_s("%d",&choice);
 		switch (choice) {
 			case 1:
+				printf("\t\t\t查看所有联系人信息\n");
 				traverse_book(my_pb);
 				printf("\n");
+				printf("******************************************************************************\n");
 				break;
 			case 2:
+				printf("\t\t\t查找联系人\n");
 				//按姓名查找联系人
-				printf("请输入要查找的联系人姓名：\n");
+				printf("请输入要查找的联系人姓名（最多10个字符）：");
 				scanf_s("%s", my_user.name,(unsigned)_countof(my_user.name));
-				printf("您要查找：%s\n",my_user.name);
+				printf("联系人%s的查找结果：\n",my_user.name);
 				result = locate_user(my_pb, my_user);
-				if (result > 0) {
-					show_user_infor(my_pb, result);
+				if (result > 0) {   //查找到了目标用户
+					get_user(my_pb,result,target);
+					show_user_infor(*target);
 				}
 				printf("\n");
+				printf("******************************************************************************\n");
 				break;
 			case 3:
+				printf("\t\t\t新增联系人\n");
+				//新增联系人
+				printf("请输入姓名（最多10个字符）：");
+				scanf_s("%s",my_user.name,(unsigned)_countof(my_user.name));
+				printf("请输入单位（最多14个字符）：");
+				scanf_s("%s",my_user.department,(unsigned)_countof(my_user.department));
+				printf("请输入固定电话（最多8个字符）：");
+				scanf_s("%s",my_user.phone,(unsigned)_countof(my_user.phone));
+				printf("请输入移动电话（最多11个字符）：");
+				scanf_s("%s",my_user.mobile,(unsigned)_countof(my_user.mobile));
+				//默认在电话本最后添加新联系人
+				insert_new_user(my_pb,my_user,my_pb->user_num+1);
+				printf("\n");
+				printf("******************************************************************************\n");
 				break;
 			case 4:
+				printf("\t\t\t删除联系人\n");
+				printf("请输入要删除联系人的姓名：");
+				scanf_s("%s",my_user.name,(unsigned)_countof(my_user.name));
+				result=locate_user(my_pb,my_user);
+				if (result > 0) {
+					//查找到该联系人
+					delete_user(my_pb,result,target);
+				}
+				printf("\n");
+				printf("******************************************************************************\n");
 				break;
+			case 5:
+				printf("已退出电话本程序！\n");
+				printf("\n");
+				printf("******************************************************************************\n");
+				system("pause");
+				return 0;
+			default:
+				printf("菜单选择错误，请重新输入！\n");
+				printf("\n");
+				printf("******************************************************************************\n");
 		}
 	}
-	
 	return 0;
 }
