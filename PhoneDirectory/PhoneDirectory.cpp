@@ -74,7 +74,17 @@ void show_user_infor(User u) {
 	printf("\n");
 }
 
-//一会儿试一下input_user，返回一个User类型的指针***********************************************
+//输入用户信息
+void input_user(User *new_user) {
+	printf("请输入姓名（最多10个字符）：");
+	scanf_s("%s", new_user->name, (unsigned)_countof(new_user->name));
+	printf("请输入单位（最多14个字符）：");
+	scanf_s("%s", new_user->department, (unsigned)_countof(new_user->department));
+	printf("请输入固定电话（最多8个字符）：");
+	scanf_s("%s", new_user->phone, (unsigned)_countof(new_user->phone));
+	printf("请输入移动电话（最多11个字符）：");
+	scanf_s("%s", new_user->mobile, (unsigned)_countof(new_user->mobile));
+}
 
 //在指定位置插入新联系人
 int insert_new_user(PhoneBook *pb, User new_user, int p) {
@@ -141,16 +151,36 @@ int get_user(PhoneBook *pb, int p,User *target_user) {
 }
 
 void welcome() {
-	printf("\t\t\t**********电话本管理***********\n");
-	printf("\t\t\t*******************************\n");
+	printf("\t\t\t\t****************\n");
+	printf("\t\t\t\t*              *\n");
+	printf("\t\t\t\t*  电话本管理  *\n");
+	printf("\t\t\t\t*              *\n");
+	printf("\t\t\t\t****************\n");
+	printf("\n");
+}
+
+void show_menu() {
+	printf("1.浏览联系人\t 2.查找联系人\t 3.新增联系人\t 4.删除联系人\t 5.退出电话本\n");
+	printf("请选择菜单1-5：");
+}
+
+void header_output(char msg[100]) {
+	printf("\t\t\t\t");
+	printf("---%s---\n", msg);
+}
+
+void tail_output() {
+	printf("\n");
+	printf("******************************************************************************\n");
+	printf("\n");
 }
 
 int main() {
-	welcome();
-
+	char message[100] = "";
 	int choice;  //接收用户输入的菜单选项
 	User my_user;
 	User *target = (User*)malloc(sizeof(User));  //target用于存储取得的user
+	User *my_new_user = (User *)malloc(sizeof(User));
 	int result = 0;  //接收函数的返回值
 
 	//初始化一个电话本
@@ -159,19 +189,19 @@ int main() {
 	if (init_phone_book(my_pb) != 0)
 		return 0;	
 
+	welcome();
 	while (true) {
-		printf("1.浏览联系人\t 2.查找联系人\t 3.新增联系人\t 4.删除联系人\t 5.退出电话本\n");
-		printf("请输入1-5：");
+		show_menu();  //显示菜单，提示用户输入
 		scanf_s("%d",&choice);
 		switch (choice) {
 			case 1:
-				printf("\t\t\t查看所有联系人信息\n");
+				strcpy_s(message,"浏览联系人");
+				header_output(message);
 				traverse_book(my_pb);
-				printf("\n");
-				printf("******************************************************************************\n");
 				break;
 			case 2:
-				printf("\t\t\t查找联系人\n");
+				strcpy_s(message, "查找联系人");
+				header_output(message);
 				//按姓名查找联系人
 				printf("请输入要查找的联系人姓名（最多10个字符）：");
 				scanf_s("%s", my_user.name,(unsigned)_countof(my_user.name));
@@ -181,27 +211,18 @@ int main() {
 					get_user(my_pb,result,target);
 					show_user_infor(*target);
 				}
-				printf("\n");
-				printf("******************************************************************************\n");
 				break;
 			case 3:
-				printf("\t\t\t新增联系人\n");
-				//新增联系人
-				printf("请输入姓名（最多10个字符）：");
-				scanf_s("%s",my_user.name,(unsigned)_countof(my_user.name));
-				printf("请输入单位（最多14个字符）：");
-				scanf_s("%s",my_user.department,(unsigned)_countof(my_user.department));
-				printf("请输入固定电话（最多8个字符）：");
-				scanf_s("%s",my_user.phone,(unsigned)_countof(my_user.phone));
-				printf("请输入移动电话（最多11个字符）：");
-				scanf_s("%s",my_user.mobile,(unsigned)_countof(my_user.mobile));
+				strcpy_s(message, "新增联系人");
+				header_output(message);
+				//输入新联系人信息
+				input_user(my_new_user);
 				//默认在电话本最后添加新联系人
-				insert_new_user(my_pb,my_user,my_pb->user_num+1);
-				printf("\n");
-				printf("******************************************************************************\n");
+				insert_new_user(my_pb,*my_new_user,my_pb->user_num+1);
 				break;
 			case 4:
-				printf("\t\t\t删除联系人\n");
+				strcpy_s(message, "删除联系人");
+				header_output(message);
 				printf("请输入要删除联系人的姓名：");
 				scanf_s("%s",my_user.name,(unsigned)_countof(my_user.name));
 				result=locate_user(my_pb,my_user);
@@ -209,20 +230,19 @@ int main() {
 					//查找到该联系人
 					delete_user(my_pb,result,target);
 				}
-				printf("\n");
-				printf("******************************************************************************\n");
 				break;
 			case 5:
-				printf("已退出电话本程序！\n");
-				printf("\n");
-				printf("******************************************************************************\n");
+				strcpy_s(message, "退出电话本");
+				header_output(message);
+				printf("您已退出电话本程序，感谢您的使用！\n");
 				system("pause");
 				return 0;
 			default:
+				strcpy_s(message, "菜单项错误");
+				header_output(message);
 				printf("菜单选择错误，请重新输入！\n");
-				printf("\n");
-				printf("******************************************************************************\n");
 		}
+		tail_output();
 	}
 	return 0;
 }
